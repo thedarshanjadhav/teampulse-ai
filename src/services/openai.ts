@@ -65,3 +65,51 @@ export const analyzeMeeting = async (
 
   return parsed;
 };
+
+export const generateFollowUpEmail = async (
+  result: MeetingResult,
+): Promise<string> => {
+  const url = `${ENDPOINT}openai/deployments/${DEPLOYMENT}/chat/completions?api-version=2024-08-01-preview`;
+
+  const taskList = result.tasks
+    .map((t) => `- ${t.title} (Owner: ${t.owner})`)
+    .join("\n");
+
+  const response = await axios.post(
+    url,
+    {
+      messages: [
+        {
+          role: "system",
+          content: `You are a professional email writer. Write a concise, friendly follow-up email after a team meeting. Include the key decisions, action items with owners, and a motivating closing line. Use plain text, no markdown.`,
+        },
+        {
+          role: "user",
+          content: `Write a follow-up email based on this meeting:
+
+Summary:
+${result.summary.join("\n")}
+
+Decisions Made:
+${result.decisions.join("\n") || "None"}
+
+Action Items:
+${taskList || "None"}
+
+Follow-up Questions:
+${result.followups.join("\n") || "None"}`,
+        },
+      ],
+      max_tokens: 600,
+      temperature: 0.7,
+    },
+    {
+      headers: {
+        "api-key": KEY,
+        "Content-Type": "application/json",
+      },
+    },
+  );
+
+  return response.data.choices[0].message.content;
+};

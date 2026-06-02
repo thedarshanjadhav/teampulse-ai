@@ -3,6 +3,7 @@ import MeetingInput from "./components/MeetingInput";
 import MeetingSummary from "./components/MeetingSummary";
 import TaskBoard from "./components/TaskBoard";
 import { analyzeMeeting } from "./services/openai";
+import FollowUpEmail from "./components/FollowUpEmail";
 import "./App.css";
 
 export interface Task {
@@ -57,6 +58,7 @@ function App() {
           <>
             <MeetingSummary result={result} />
             <TaskBoard tasks={result.tasks} onUpdate={handleTaskUpdate} />
+            <FollowUpEmail result={result} />
           </>
         )}
       </main>
