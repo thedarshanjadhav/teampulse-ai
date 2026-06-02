@@ -5,8 +5,18 @@ const ENDPOINT = import.meta.env.VITE_AZURE_OPENAI_ENDPOINT;
 const KEY = import.meta.env.VITE_AZURE_OPENAI_KEY;
 const DEPLOYMENT = import.meta.env.VITE_AZURE_OPENAI_DEPLOYMENT;
 
-const PROMPT = `You are a meeting intelligence assistant.
+const PROMPT = `You are a strict meeting intelligence assistant.
 Analyze the meeting transcript and return ONLY a valid JSON object with no extra text, no markdown, no backticks.
+
+Score the meeting health STRICTLY based on:
+- Were clear action items assigned to specific people? (no owner = penalty)
+- Were decisions actually made? (vague discussion = penalty)
+- Was the meeting focused and productive? (small talk = penalty)
+- Did people commit to deadlines? (no deadlines = penalty)
+
+A meeting with no owners, no decisions, no deadlines, and vague discussion should score 1-3.
+A meeting with some structure but missing elements should score 4-6.
+A meeting with clear owners, decisions, and deadlines should score 7-10.
 
 Return exactly this structure:
 {
@@ -17,7 +27,7 @@ Return exactly this structure:
     { "id": "1", "title": "task title", "owner": "person name or Unassigned", "status": "todo" }
   ],
   "healthScore": 8,
-  "healthReason": "reason why this score"
+  "healthReason": "specific reason why this score based on the criteria above"
 }`;
 
 export const analyzeMeeting = async (
